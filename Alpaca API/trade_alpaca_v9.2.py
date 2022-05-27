@@ -10,7 +10,6 @@ from tradingview_ta import *
 api = REST(config.API_KEY, config.SECRET_KEY, base_url=config.BASE_URL)#tickers = "FB,AMZN,INTC,MSFT,AAPL,GOOG,CSCO,CMCSA"
 tickers = "FB,AMZN,INTC,MSFT,AAPL,GOOG,CSCO,CMCSA,ADBE,NVDA,NFLX,PYPL,AMGN,AVGO,TXN,CHTR,QCOM,GILD,FISV,BKNG,INTU,ADP,CME,TMUS,MU,TSLA"
 tickers = tickers.split(",")
-#if tickers is not a list
 
 #tickers = tickers.split(",")
 
@@ -23,6 +22,7 @@ take_profit = max_pos*0.01 #1% for each trade
 stoch_signal = {}
 for ticker in tickers:
     stoch_signal[ticker] = ""
+
 
 
 def techAnalysis(symbols, screener='america', exchange='NASDAQ'):
@@ -40,7 +40,7 @@ def techAnalysis(symbols, screener='america', exchange='NASDAQ'):
         tesla = TA_Handler(screener=screener,
                        symbol=symbols,
                        exchange=exchange,
-                       interval=Interval.INTERVAL_15_MINUTES)
+                       interval=Interval.INTERVAL_5_MINUTES)
     
         result = tesla.get_analysis().indicators
         
@@ -58,7 +58,7 @@ def techAnalysis(symbols, screener='america', exchange='NASDAQ'):
         pass
     
     return last_close,last_bbLower,last_bbUpper,last_RSI,last_RSI_2,last_D,last_D_2,last_K,last_K_2
-    
+   
 
 def main():
     global stoch_signal
@@ -71,7 +71,7 @@ def main():
 
         last_close,last_downbb,last_upbb,last_rsi,last_rsi_2,last_d,last_d_2,last_k,last_k_2 = techAnalysis(ticker)
        
-        print("last Close   :", last_close)
+        print("last Close :", last_close)
         print("last bblower :", last_downbb)
         print("last bbupper :", last_upbb)
         print("last RSI   :", last_rsi)
@@ -93,13 +93,13 @@ def main():
                     print("existing position of {} stocks in {}...skipping".format(position.qty, ticker))
                     existing_pos = True
         
-        if stoch_signal[ticker]=="oversold" and last_rsi <=30  and last_d <20 and last_d < last_k and existing_pos == False:
+        if stoch_signal[ticker]=="oversold" and last_rsi < 30 and last_d < last_k and existing_pos == False:
             
             api.submit_order(ticker, max(1,int(max_pos/last_close)), "buy", "market", "ioc")
             print("bought {} stocks in {}".format(int(max_pos/last_close),ticker))
             time.sleep(2)
         
-        elif stoch_signal[ticker]=="overbought" and last_rsi >=70  and last_d >80 and last_d > last_k and existing_pos == False:
+        elif stoch_signal[ticker]=="overbought" and last_rsi > 70 and last_d > last_k and existing_pos == False:
 
             api.submit_order(ticker, max(1,int(max_pos/last_close)), "sell", "market", "ioc")
             print("bought {} stocks in {}".format(int(max_pos/last_close),ticker))
@@ -144,7 +144,7 @@ while True:
             main()
             sl_tp()
             print("Waiting........")
-            time.sleep(900 - ((time.time() - starttime) % 900))
+            time.sleep(300 - ((time.time() - starttime) % 300))
         except Exception as e:
             print(e)
             continue

@@ -8,12 +8,8 @@ import config
 from tradingview_ta import *
 
 api = REST(config.API_KEY, config.SECRET_KEY, base_url=config.BASE_URL)#tickers = "FB,AMZN,INTC,MSFT,AAPL,GOOG,CSCO,CMCSA"
-#tickers = "FB,AMZN,INTC,MSFT,AAPL,GOOG,CSCO,CMCSA,ADBE,NVDA,NFLX,PYPL,AMGN,AVGO,TXN,CHTR,QCOM,GILD,FISV,BKNG,INTU,ADP,CME,TMUS,MU"
-#tickers = tickers_sp500()
-#if tickers is not a list
-tickers = [ 'MNDY', 'MULN', 'ONON', 'PAGS', 'AFRM', 'BEKE', 'BILI', 'COUP', 'DASH', 'DOCU', 'GTLB', 'KC', 
-            'LI', 'NIO', 'SHOP', 'SOFI', 'STNE', 'TME', 'XPEV', 'YANG', 'YMM', 'FUTU', 'OKTA', 'PIK', 
-           'SQ', 'PTON', 'ASAN','CWEB']
+tickers = "FB,AMZN,INTC,MSFT,AAPL,GOOG,CSCO,CMCSA,ADBE,NVDA,NFLX,PYPL,AMGN,AVGO,TXN,CHTR,QCOM,GILD,FISV,BKNG,INTU,ADP,CME,TMUS,MU,TSLA"
+tickers = tickers.split(",")
 
 #tickers = tickers.split(",")
 
@@ -28,6 +24,7 @@ for ticker in tickers:
     stoch_signal[ticker] = ""
 
 
+
 def techAnalysis(symbols, screener='america', exchange='NASDAQ'):
     '''
     go to tvdb.brianthe.dev to select screener and exchange 
@@ -38,27 +35,30 @@ def techAnalysis(symbols, screener='america', exchange='NASDAQ'):
     Interval.INTERVAL_5_MINUTES
     Interval.INTERVAL_1_MINUTES
     '''
-
-    print(f"Analysis for {symbols}")
-    tesla = TA_Handler(screener=screener,
-                   symbol=symbols,
-                   exchange=exchange,
-                   interval=Interval.INTERVAL_1_HOUR)
-
-    result = tesla.get_analysis().indicators
+    try:
+        print(f"Analysis for {symbols}")
+        tesla = TA_Handler(screener=screener,
+                       symbol=symbols,
+                       exchange=exchange,
+                       interval=Interval.INTERVAL_5_MINUTES)
     
-    last_bbLower = result['BB.lower']
-    last_bbUpper = result['BB.upper']
-    last_RSI     = result['RSI']
-    last_RSI_2 = result['RSI[1]']
-    last_D = result['Stoch.D']
-    last_D_2 = result['Stoch.D[1]']
-    last_K = result['Stoch.K']
-    last_K_2 = result['Stoch.K[1]']
-    last_close = result["Close"]
+        result = tesla.get_analysis().indicators
+        
+        last_bbLower = result['BB.lower']
+        last_bbUpper = result['BB.upper']
+        last_RSI     = result['RSI']
+        last_RSI_2 = result['RSI[1]']
+        last_D = result['Stoch.D']
+        last_D_2 = result['Stoch.D[1]']
+        last_K = result['Stoch.K']
+        last_K_2 = result['Stoch.K[1]']
+        last_close = result["close"]
+    except Exception as e:
+        print(e)
+        pass
     
     return last_close,last_bbLower,last_bbUpper,last_RSI,last_RSI_2,last_D,last_D_2,last_K,last_K_2
-    
+   
 
 def main():
     global stoch_signal
@@ -136,7 +136,7 @@ clock = api.get_clock()
 #clock.is_open
 starttime = time.time()
 #timeout = starttime + 60*5
-end_time = "01:30:00"
+#end_time = "01:30:00"
 while True:
     if clock.is_open:
         try:
@@ -144,7 +144,7 @@ while True:
             main()
             sl_tp()
             print("Waiting........")
-            time.sleep(900 - ((time.time() - starttime) % 900))
+            time.sleep(300 - ((time.time() - starttime) % 300))
         except Exception as e:
             print(e)
             continue
