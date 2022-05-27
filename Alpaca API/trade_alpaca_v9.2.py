@@ -40,7 +40,7 @@ def techAnalysis(symbols, screener='america', exchange='NASDAQ'):
         tesla = TA_Handler(screener=screener,
                        symbol=symbols,
                        exchange=exchange,
-                       interval=Interval.INTERVAL_5_MINUTES)
+                       interval=Interval.INTERVAL_15_MINUTES)
     
         result = tesla.get_analysis().indicators
         
